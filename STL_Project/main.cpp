@@ -4,7 +4,8 @@
 #include <array>
 #include <fstream>
 #include <algorithm>
-#include <filesystem>
+#include <numeric>
+#include <print>
 
 /*
 [조건]
@@ -27,10 +28,6 @@ void Player::write( ostream& os ) {
  - 문제를 순서대로 해결하여야 한다
 
 [과제]
-
-2.	점수가 가장 큰 Player를 찾아 화면에 출력하라.(동점 모두 출력)
-	Player의 평균 점수를 계산하여 화면에 출력하라.
-	- 어떻게 찾고 계산하였는지 보고서에 설명하라.
 
 3.	id가 서로 같은 객체를 찾아 "같은아이디.txt"에 기록하라.
 	id가 같은 객체는 모두 몇 개인지 화면에 출력하라.
@@ -63,8 +60,8 @@ class Player {
 public:
 	void read( std::ifstream& in ) {
 		Player temp;
-		in.read((char*)&temp, sizeof(Player));
-
+		in.read((char*)(&temp), sizeof(Player));
+		
 		name = temp.name.c_str();
 		score = temp.score;
 		id = temp.id;
@@ -73,6 +70,15 @@ public:
 
 		p = std::make_unique<char[]>(num);
 		in.read(p.get(), num);
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const Player& player) {
+		std::print("이름: {:16}, 아이디: {}, 점수: {}, 자원수: {}, 저장된 글자: {}", player.name, player.id, player.score, player.num, player.p.get());
+		return os;
+	}
+
+	int getScore() const {
+		return score;
 	}
 
 private:
@@ -98,13 +104,41 @@ int main()
 		return 2022184025;
 	}
 		
-	int cnt = 0;
 	for (auto& p : players) {
 		p.read(in);
-		++cnt;
 	}
 
-	std::cout << "객체 개수: " << cnt << std::endl;
+	std::cout << players.back() << std::endl << std::endl;
+
+	/* 
+	2.	점수가 가장 큰 Player를 찾아 화면에 출력하라.(동점 모두 출력)
+		Player의 평균 점수를 계산하여 화면에 출력하라.
+		- 어떻게 찾고 계산하였는지 보고서에 설명하라.
+	*/
+
+	long long sum{};
+	int curVal{};
+	int maxVal = std::numeric_limits<int>::min();
+	std::for_each(players.begin(), players.end(), [&](const Player& player) {
+		curVal = player.getScore();
+		sum += curVal;
+		if (sum < 0) std::cout << "Warning!" << std::endl;
+		if (curVal > maxVal)
+			maxVal = curVal;
+		});
+
+	for (const Player& player : players) {
+		if (player.getScore() == maxVal)
+			std::cout << player << std::endl;
+	}
+
+	double average = static_cast<double>(sum) / players.size();
+
+	std::cout << std::endl;
+	std::print("평균 점수: {:f}", average);
+
+
+
 
 	return 0;
 }
