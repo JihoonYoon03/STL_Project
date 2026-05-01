@@ -29,15 +29,6 @@ void Player::write( ostream& os ) {
 
 [과제]
 
-3.	id가 서로 같은 객체를 찾아 "같은아이디.txt"에 기록하라.
-	id가 같은 객체는 모두 몇 개인지 화면에 출력하라.
-	파일에는 id가 같은 Player 객체의 이름과 아이디를 한 줄 씩 기록한다.
-	- 어떻게 같은 id를 찾았는지 보고서에 설명하라.
-
-4.	Player의 멤버 p가 가리키는 메모리에는 파일에서 읽은 num개의 char가 저장되어 있어야 한다.
-	메모리에 저장된 char를 오름차순으로 정렬하라.
-	'0'부터 ‘9’까지 모든 숫자가 있는 Player를 찾아 모두 몇 객체인지 출력하라. - 어떻게 찾았는지 보고서에 설명하라.
-
 5. [ LOOP ] id를 입력받아 존재하는 id라면 다음 내용을 한 번에 화면 출력하라.
 	- 모든 Player가 id 기준 오름차순으로 정렬되어 있는 상태에서
 	해당 id 포함 앞과 뒤 Player의 정보를 출력한다.
@@ -79,6 +70,23 @@ public:
 
 	int getScore() const {
 		return score;
+	}
+
+	size_t getID() const {
+		return id;
+	}
+
+	size_t size() const {
+		return num;
+	}
+
+	char* data() const {
+		return p.get();
+	}
+
+	std::string info() const {
+		std::string inf = "이름: " + name + ", ID: " + std::to_string(id);
+		return inf;
 	}
 
 private:
@@ -136,9 +144,57 @@ int main()
 
 	std::cout << std::endl;
 	std::print("평균 점수: {:f}", average);
+	std::cout << std::endl;
 
+	/*
+	3.	id가 서로 같은 객체를 찾아 "같은아이디.txt"에 기록하라.
+		id가 같은 객체는 모두 몇 개인지 화면에 출력하라.
+		파일에는 id가 같은 Player 객체의 이름과 아이디를 한 줄 씩 기록한다.
+		- 어떻게 같은 id를 찾았는지 보고서에 설명하라.
+	*/
 
+	std::sort(players.begin(), players.end(), [](const Player& a, const Player& b) {
+		return a.getID() < b.getID();
+		});
 
+	std::ofstream out{ "같은아이디.txt" };
+
+	size_t count{};
+	size_t curID = std::numeric_limits<size_t>::max();
+
+	for (auto cur = players.begin(); cur != players.end(); ++cur) {
+		size_t pID = cur->getID();
+		if (curID != pID) {
+			curID = pID;
+			auto next = cur + 1;
+			if (next != players.end() && pID == next->getID()) {
+				out << cur->info() + "\n";
+			}
+			continue;
+		}
+
+		count++;
+		out << cur->info() + "\n";
+	}
+
+	std::cout << "같은 아이디 객체 개수: " << count << std::endl;
+
+	/*
+	4.	Player의 멤버 p가 가리키는 메모리에는 파일에서 읽은 num개의 char가 저장되어 있어야 한다.
+		메모리에 저장된 char를 오름차순으로 정렬하라.
+		'0'부터 '9'까지 모든 숫자가 있는 Player를 찾아 모두 몇 객체인지 출력하라. - 어떻게 찾았는지 보고서에 설명하라.
+	*/
+
+	for (Player& player : players) {
+		std::sort(player.data(), player.data() + player.size());
+	}
+
+	std::string digits{ "0123456789" };
+	count = std::count_if(players.begin(), players.end(), [&](const Player& player) {
+		return std::includes(player.data(), player.data() + player.size(), digits.begin(), digits.end());
+		});
+
+	std::cout << "0부터 9까지의 숫자를 저장하는 Player 객체 개수: " << count << std::endl;
 
 	return 0;
 }
