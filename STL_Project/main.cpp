@@ -2,33 +2,11 @@
 #include <string>
 #include <memory>
 #include <array>
+#include <vector>
 #include <fstream>
 #include <algorithm>
 #include <numeric>
 #include <print>
-#include <chrono>
-
-/*
-[조건]
-e-class에서 받은 "2026 STL 과제 자료생성.exe" 파일을 받아 실행한다.
-- 파일은 x64, Release mode로 빌드하였다.
-
-폴더에 "2026 STL 과제 파일 - 학번"이 생성되었나 확인한다.
-- 파일에는 300'0000(3백만)개의 Player 객체가 기록되어 있다.
-
-파일은 바이너리(ios::binary)로 열었으며
-다음과 같은 멤버함수 write를 사용하여 300만개의 Player 객체를 기록하였다.
-
-void Player::write( ostream& os ) {
-	os.write((char*)this, sizeof(Player));
-	os.write((char*)p.get(), num);
-}
-
-* 주의 - 이 과제에서 Player 객체는 추가되거나 삭제되지 않는다.
- - 파일을 한 번만 읽고 과제를 해결하여야 한다.(메모리에 저장 후 해결)
- - 문제를 순서대로 해결하여야 한다
-
-*/
 
 class Player {
 public:
