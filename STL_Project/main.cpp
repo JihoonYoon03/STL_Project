@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <print>
+#include <chrono>
 
 /*
 [조건]
@@ -116,16 +117,23 @@ int main()
 		long long sum{};
 		int curVal{};
 		int maxVal = std::numeric_limits<int>::min();
-		std::for_each(players.begin(), players.end(), [&](const Player& player) {
+		std::vector<Player*> p;
+		p.reserve(100);
+
+		// 컨테이너의 원소마다 실행
+		std::for_each(players.begin(), players.end(), [&](Player& player) {
 			curVal = player.getScore();
 			sum += curVal;
-			if (curVal > maxVal)
+			if (curVal > maxVal) {
 				maxVal = curVal;
+				p.clear();
+			}
+			if (curVal == maxVal)
+				p.emplace_back(&player);
 			});
 
-		for (const Player& player : players) {
-			if (player.getScore() == maxVal)
-				std::cout << player << std::endl;
+		for (const Player* player : p) {
+			std::cout << *player << std::endl;
 		}
 
 		double average = static_cast<double>(sum) / players.size();
@@ -152,6 +160,7 @@ int main()
 		auto rangeBegin = players.begin();
 
 		while (true) {
+			// 인접 원소끼리 ID가 같으면 앞 원소를 가리키는 반복자 리턴
 			rangeBegin = std::adjacent_find(rangeBegin, players.end(), [](const Player& a, const Player& b) {
 				return a.getID() == b.getID();
 				});
@@ -161,6 +170,8 @@ int main()
 
 			size_t curID = rangeBegin->getID();
 
+			// upper_bound: 컨테이너가 정렬 되었음을 가정하고, 이진 탐색
+			// 현재 ID보다 큰 ID 발견 시 해당 원소를 가리키는 반복자 리턴
 			auto rangeEnd = std::upper_bound(rangeBegin, players.end(), curID, [](size_t id, const Player& player) {
 				return id < player.getID();
 				});
@@ -182,9 +193,10 @@ int main()
 	*/
 	{
 		for (Player& player : players) {
-			//std::sort(player.data(), player.data() + player.size());
+			std::sort(player.data(), player.data() + player.size());
 		}
 
+		// includes로 0123456789 포함 여부 검사
 		std::string digits{ "0123456789" };
 		size_t count = std::count_if(players.begin(), players.end(), [&](const Player& player) {
 			return std::includes(player.data(), player.data() + player.size(), digits.begin(), digits.end());
@@ -242,7 +254,8 @@ int main()
 				if (input.front() == '-' || pos != input.size())
 					throw std::invalid_argument("잘못된 입력 값");
 
-				// ID 출력 -----------------------------------------------------------------------------------
+				// ==========================================================================================
+				// ID 출력 ===================================================================================
 				auto rangeBeginID = std::find_if(players.begin(), players.end(), [&](const Player& player) {
 					return player.getID() == ID;
 					});
@@ -283,7 +296,8 @@ int main()
 					return players[i].getID() == ID;
 					});
 
-				// name 출력 --------------------------------------------------------------------------
+				// ============================================================================================
+				// name 출력 ===================================================================================
 				std::cout		<< "┌─ 이름 정렬 기준 ──────────────────────────────────────────────┐\n\n";
 				if (iterName != indexName.begin()) {
 					std::cout	<< "├──────────────── 앞쪽 Player ──────────────────────────────────┤\n"
@@ -299,7 +313,8 @@ int main()
 				}
 				std::cout		<< "└───────────────────────────────────────────────────────────────┘\n\n";
 
-				// score 출력 --------------------------------------------------------------------------
+				// =============================================================================================
+				// score 출력 ===================================================================================
 				std::cout		<< "┌─ 점수 정렬 기준 ──────────────────────────────────────────────┐\n\n";
 				if (iterScore != indexScore.begin()) {
 					std::cout	<< "├──────────────── 앞쪽 Player ──────────────────────────────────┤\n"
